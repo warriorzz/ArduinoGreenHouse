@@ -1,7 +1,8 @@
 void setup() {
-  //HOHOHO
+  pinMode( moistureSensorPin, INPUT);
+  pinMode( motorPin, OUTPUT);
 }
 
 void loop() {
-  //HOHOHO
+  
 }
