@@ -20,6 +20,9 @@ void setup() {
   pinMode( moistureSensorPin, INPUT);
   pinMode( motorPin, OUTPUT);
   setupLCD();
+  if(setupSDCard()) {
+    //TODO
+  }
 }
 
 void loop() {

@@ -8,10 +8,9 @@ bool setupSDCard() {
 void openFile(String name) {
   nameAtm = name;
   atmFile = SD.open(name, FILE_WRITE);
-  return atmFile;
 }
 
-void write(String line) {
+void writeLine(String line) {
   atmFile.println(line);
 }
 
