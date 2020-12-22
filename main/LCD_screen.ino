@@ -3,24 +3,24 @@ void setupLCD() {
     lcd.backlight();
 }
 
-void displaySecondLine(string line) {
-    lcd.cursor(1,0);
-    lcd.print(line)
+void displaySecondLine(String line) {
+    lcd.setCursor(1,0);
+    lcd.print(line);
 }
 
-void displayFirstLine(string line) {
-  lcd.cursor(0,0);
-  lcd.print(line)
+void displayFirstLine(String line) {
+  lcd.setCursor(0,0);
+  lcd.print(line);
 }
 
-void displaySecondLine(string line, int cursor) {
-    lcd.cursor(1,cursor);
-    lcd.print(line)
+void displaySecondLine(String line, int cursor) {
+    lcd.setCursor(1,cursor);
+    lcd.print(line);
 }
 
-void displayFirstLine(string line, int cursor) {
-    lcd.cursor(0,cursor);
-    lcd.print(line)
+void displayFirstLine(String line, int cursor) {
+    lcd.setCursor(0,cursor);
+    lcd.print(line);
 }
 
 void setupLCD(bool backlight) {
