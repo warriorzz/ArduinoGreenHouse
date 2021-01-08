@@ -1,13 +1,10 @@
-File atmFile;
-String nameAtm;
-
 bool setupSDCard() {
   return SD.begin(5);
 }
 
-void openFile(String name) {
-  nameAtm = name;
-  atmFile = SD.open(name, FILE_WRITE);
+void openFile(String fileName) {
+  nameAtm = fileName;
+  atmFile = SD.open(fileName, FILE_WRITE);
 }
 
 void writeLine(String line) {
