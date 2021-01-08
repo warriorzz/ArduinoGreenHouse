@@ -10,10 +10,22 @@ void openFile(String name) {
   atmFile = SD.open(name, FILE_WRITE);
 }
 
-void writeLine(String line) {
-  atmFile.println(line);
+void printPart(String line) {
+  atmFile.print(line);
+}
+
+void printPart(uint8_t line) {
+  atmFile.print(line);
+}
+
+void printLn() {
+    atmFile.println();
 }
 
 void closeFile() {
   atmFile.close();
+}
+
+void writePlaceholder() {
+  atmFile.print(" - ");
 }
