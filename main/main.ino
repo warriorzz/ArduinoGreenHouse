@@ -27,4 +27,5 @@ void setup() {
 
 void loop() {
   checkMoisture();
+  delay(1000);
 }
