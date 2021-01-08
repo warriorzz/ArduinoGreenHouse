@@ -19,7 +19,7 @@ void loop(){
    float timeStamp = getTime() / 1000;
    float tempC = getTemp();
    
-   openFile("tempLog.txtxe");
+   openFile("tempLog.txt");
    if ( atmFile ){
      atmFile.print(timeStamp);
      atmFile.print(" : ");
@@ -27,7 +27,7 @@ void loop(){
      atmFile.println("°C");
      closeFile();
    }
-   else Serial.println("Error accessing the card.")
+   else Serial.println("Error accessing the card.");
 
    Serial.print(timeStamp);
    Serial.print(" : ");
