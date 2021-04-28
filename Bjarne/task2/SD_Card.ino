@@ -1,17 +1,25 @@
+String nameAtm;
+File atmFile;
+
 bool setupSDCard() {
   return SD.begin(5);
 }
 
 void openFile(String fileName) {
   nameAtm = fileName;
-  atmFile = SD.open(fileName, FILE_WRITE);
+  atmFile = SD.open(fileName, FILE_READ);
+  Serial.println(atmFile);
 }
 
 void printPart(String line) {
   atmFile.print(line);
 }
 
-void printPart(uint8_t line) {
+void printPart(int line) {
+  atmFile.print(line);
+}
+
+void printPart(float line) {
   atmFile.print(line);
 }
 
@@ -25,4 +33,8 @@ void closeFile() {
 
 void writePlaceholder() {
   atmFile.print(" - ");
+}
+
+void readFile() {
+  Serial.println(atmFile.read());
 }

@@ -6,20 +6,20 @@ void setupRTC() {
   rtc.begin();
   rtc.adjust(DateTime(F(__DATE__),  F(__TIME__)));
 
-  openFile("Messdaten.txt");
-  printPart("Tag - Monat - Jahr - Stunden - Minuten - Temperatur - Druck(Pascal) - Druck(Bar) - Luftfeuchtigkeit");
+  openFile("MESSDATEN.CSV");
+  printPart("Tag;Monat;Jahr;Stunden;Minuten;Temperatur;Druck(Pascal);Druck(Bar);Luftfeuchtigkeit");
   printLn();
   closeFile();
 }
 
 void loopRTC() {
       DateTime now = rtc.now();
-      openFile("messdaten.txt");
+      openFile("MESSDATEN.CSV");
       printPart(now.day());
       writePlaceholder();
       printPart(now.month());
       writePlaceholder();
-      printPart(now.year());
+      printPart((int) now.year());
       writePlaceholder();
       printPart(now.hour() + 1);
       writePlaceholder();
@@ -35,6 +35,15 @@ void loopRTC() {
       printHumidityOnSDCard();
 
       printLn();
-
       closeFile();
+      readFile();
+      closeFile();
+}
+
+char getCharArrayFromInt(uint8_t value) {
+   char output[50];
+
+   snprintf(output, 50, "%f", value);
+
+   return output;
 }
