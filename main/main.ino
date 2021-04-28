@@ -17,8 +17,7 @@ LiquidCrystal_I2C lcd(0x27,16,2);
 
 //Variables for SD Card
 File atmFile;
-String nameAtm;
-const String bmeDataFileName = "data.csv";
+String nameAtm = String("_DATA.CSV");
 
 //Variables for RTC
 RTC_DS3231 rtc;
@@ -27,28 +26,30 @@ RTC_DS3231 rtc;
 BME280 bme;
 
 void setup() {
-  // initalize moisture sensor
+  Serial.begin(9600);
+  // initialize moisture sensor
   pinMode(moistureSensorPin, INPUT);
   // initialize pump
   pinMode(pumpPin, OUTPUT);
-  Serial.begin(9600);
   // initialize BME
-  //bme.init();
+  bme.init();
   
   setupLCD();
-  setupSDCard();
+  if (!setupSDCard()) {
+    Serial.println("Error! Could not initialize SD card");
+  }
   setupRTC();
 
-  openFile(bmeDataFileName);
-  writeLine("Time;Pressure (Bar);Pressure (Pascal);Humidity");
+  openFile(nameAtm);
+  writeLine("Time;Pressure (Bar);Pressure (Pascal);Humidity;Temperature");
   closeFile();
 }
 
 void loop() {
   if ( nextMeasurement % 5 == 0 ) checkMoisture();
-  
-  openFile(bmeDataFileName);
-  writeLine(getTimeFormated() + ";" + getPressureBar() + ";" + getPressurePascal() + ";" + getHumidity());
+
+  openFile(nameAtm);
+  writeLine(getTimeFormatted() + ";" + getPressureBar() + ";" + getPressurePascal() + ";" + getHumidityString() + ";" + getTemperatureString());
   closeFile();
   
   delay(1000);
@@ -76,8 +77,7 @@ void checkMoisture(){
 
 //LCD
 void setupLCD() {
-    lcd.begin();
-    lcd.backlight();
+    setupLCD(true);
 }
 
 void displaySecondLine(String line) {
@@ -113,12 +113,18 @@ bool setupSDCard() {
 }
 
 void openFile(String name) {
-  nameAtm = name;
   atmFile = SD.open(name, FILE_WRITE);
+  if (!atmFile) {
+      Serial.println("Failed to open File " + nameAtm + "!");
+  }
 }
 
 void writeLine(String line) {
   atmFile.println(line);
+}
+
+void writePart(String line) {
+  atmFile.print(line);
 }
 
 void closeFile() {
@@ -131,28 +137,42 @@ void setupRTC() {
   rtc.adjust(DateTime(F(__DATE__),  F(__TIME__)));
 }
 
-String getTimeFormated() {
-  return getCharArrayFromInt(rtc.now().hour())+ String(":") + getCharArrayFromInt(rtc.now().minute()) + String(":") + getCharArrayFromInt(rtc.now().second()); 
+String getTimeFormatted() {
+  Serial.println(String(rtc.now().hour())+ String(":") + String(rtc.now().minute()) + String(":") + String(rtc.now().second()));
+  return String(rtc.now().hour()) + String(":") + String(rtc.now().minute()) + String(":") + String(rtc.now().second()); 
+}
+
+void setFileName() {
+  /*Serial.println(randomString() + String("_DATA.CSV"));
+  String string = randomString();
+  string.concat("_DATA.CSV");
+  nameAtm = string;*/
 }
 
 // BME
-float getPressurePascal() {
-  return bme.getPressure();
+String getPressurePascal() {
+  return String(bme.getPressure());
 }
 
-float getPressureBar() {
-  return bme.getPressure() / 100000;
+String getPressureBar() {
+  return String((float) bme.getPressure() / (float) 100000);
 }
 
-float getHumidity() {
-  bme.getHumidity();
+String getHumidityString() {
+  return String(bme.getHumidity());
 }
 
-// General
-char getCharArrayFromInt(uint8_t value) {
-  char output[50];
+String getTemperatureString() {
+  return String(bme.getTemperature());
+}
 
-   snprintf(output, 50, "%f", value);
-
-   return output;
+// General 
+String randomString(){
+    String pool = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    String randomString = "";
+    for (int i = 0; i < 10; i++) {
+        int randomInt = random(pool.length() - 1L);
+        randomString += pool.substring(randomInt, randomInt + 1);
+    }
+    return randomString;
 }
