@@ -17,7 +17,7 @@ LiquidCrystal_I2C lcd(0x27,16,2);
 
 //Variables for SD Card
 File atmFile;
-String nameAtm = String("_DATA.CSV");
+String nameAtm = String("TEST.CSV");
 
 //Variables for RTC
 RTC_DS3231 rtc;
@@ -40,12 +40,15 @@ void setup() {
   }
   setupRTC();
 
-  openFile(nameAtm);
-  writeLine("Time;Pressure (Bar);Pressure (Pascal);Humidity;Temperature");
-  closeFile();
+  if (isFileEmpty(nameAtm)) {
+    openFile(nameAtm);
+    writeLine("Time;Pressure (Bar);Pressure (Pascal);Humidity;Temperature");
+    closeFile();
+  }
 }
 
 void loop() {
+  digitalWrite(pumpPin, HIGH);
   if ( nextMeasurement % 5 == 0 ) checkMoisture();
 
   openFile(nameAtm);
@@ -131,6 +134,17 @@ void closeFile() {
   atmFile.close();
 }
 
+bool isFileEmpty(String name) {
+  atmFile = SD.open(name, FILE_READ);
+  if (!atmFile) {
+      Serial.println("Failed to open File " + nameAtm + "!");
+      return true;
+  }
+  bool response = atmFile.read() == -1;
+  closeFile();
+  return response;
+}
+
 // RTC
 void setupRTC() {
   rtc.begin();
@@ -138,15 +152,13 @@ void setupRTC() {
 }
 
 String getTimeFormatted() {
-  Serial.println(String(rtc.now().hour())+ String(":") + String(rtc.now().minute()) + String(":") + String(rtc.now().second()));
   return String(rtc.now().hour()) + String(":") + String(rtc.now().minute()) + String(":") + String(rtc.now().second()); 
 }
 
 void setFileName() {
-  /*Serial.println(randomString() + String("_DATA.CSV"));
   String string = randomString();
   string.concat("_DATA.CSV");
-  nameAtm = string;*/
+  nameAtm = string;
 }
 
 // BME
@@ -172,7 +184,7 @@ String randomString(){
     String randomString = "";
     for (int i = 0; i < 10; i++) {
         int randomInt = random(pool.length() - 1L);
-        randomString += pool.substring(randomInt, randomInt + 1);
+        randomString.concat(pool.substring(randomInt, randomInt + 1));
     }
     return randomString;
 }
