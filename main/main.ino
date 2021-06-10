@@ -14,10 +14,11 @@ const int pumpPin = 10;
 
 //Variables for LCD display
 LiquidCrystal_I2C lcd(0x27,16,2);
+boolean working = true;
 
 //Variables for SD Card
 File atmFile;
-String nameAtm = String("TEST.CSV");
+String nameAtm = "DATA.CSV";
 
 //Variables for RTC
 RTC_DS3231 rtc;
@@ -35,8 +36,12 @@ void setup() {
   bme.init();
   
   setupLCD();
+  String randomString = getTimeForName();
+  randomString.concat("DATA.CSV");
+  nameAtm = randomString;
   if (!setupSDCard()) {
     Serial.println("Error! Could not initialize SD card");
+    working = false;
   }
   setupRTC();
 
@@ -44,6 +49,11 @@ void setup() {
     openFile(nameAtm);
     writeLine("Time;Pressure (Bar);Pressure (Pascal);Humidity;Temperature");
     closeFile();
+  }
+  if (working) {
+    displaySecondLine(String("Working, however."));
+  } else {
+    displaySecondLine(String("PROBLEM - PROBLEM"));
   }
 }
 
@@ -95,11 +105,7 @@ void displayFirstLine(String line) {
 
 void setupLCD(bool backlight) {
     lcd.begin();
-    if (backlight) {
-        lcd.backlight();
-    } else {
-        lcd.noBacklight();
-    }
+    setBacklight(backlight);
 }
 
 void setBacklight(bool backlight) {
@@ -118,6 +124,7 @@ bool setupSDCard() {
 void openFile(String name) {
   atmFile = SD.open(name, FILE_WRITE);
   if (!atmFile) {
+      working = false;
       Serial.println("Failed to open File " + nameAtm + "!");
   }
 }
@@ -138,9 +145,11 @@ bool isFileEmpty(String name) {
   atmFile = SD.open(name, FILE_READ);
   if (!atmFile) {
       Serial.println("Failed to open File " + nameAtm + "!");
+      working = false;
       return true;
   }
   bool response = atmFile.read() == -1;
+  working = working && response;
   closeFile();
   return response;
 }
@@ -152,13 +161,11 @@ void setupRTC() {
 }
 
 String getTimeFormatted() {
-  return String(rtc.now().hour()) + String(":") + String(rtc.now().minute()) + String(":") + String(rtc.now().second()); 
+  return String(rtc.now().hour()) + String(":") + String(rtc.now().minute()) + String(":") + String(rtc.now().second());
 }
 
-void setFileName() {
-  String string = randomString();
-  string.concat("_DATA.CSV");
-  nameAtm = string;
+String getTimeForName() {
+  return String(rtc.now().year()) + String("-") + String(rtc.now().day()) + String("-") + String(rtc.now().hour()) + String("-") + String(rtc.now().minute()) + String("-") + String(rtc.now().second()) + String("-");
 }
 
 // BME
@@ -181,9 +188,9 @@ String getTemperatureString() {
 // General 
 String randomString(){
     String pool = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    String randomString = "";
+    String randomString = String("");
     for (int i = 0; i < 10; i++) {
-        int randomInt = random(pool.length() - 1L);
+        int randomInt = random(pool.length() - 2);
         randomString.concat(pool.substring(randomInt, randomInt + 1));
     }
     return randomString;
