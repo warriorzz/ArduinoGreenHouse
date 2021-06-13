@@ -76,7 +76,7 @@ void loop() {
   }
   working = true;
   delay(1000);
-  if ( (nextMeasurement+1) % 5 == 0) stopPump(); 
+  if ( (nextMeasurement+1) % 60 == 0) stopPump(); 
   // The pump should be only activated for a short time (3s)
   nextMeasurement++;
 }
