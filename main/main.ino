@@ -15,6 +15,7 @@ const int pumpPin = 10;
 //Variables for LCD display
 LiquidCrystal_I2C lcd(0x27,16,2);
 boolean working = true;
+boolean successfullyInitialized = true;
 
 //Variables for SD Card
 File atmFile;
@@ -36,12 +37,12 @@ void setup() {
   bme.init();
   
   setupLCD();
-  String randomString = getTimeForName();
+  String randomString = ""; //gvetTimeFormatted()
   randomString.concat("DATA.CSV");
   nameAtm = randomString;
   if (!setupSDCard()) {
     Serial.println("Error! Could not initialize SD card");
-    working = false;
+    successfullyInitialized = false;
   }
   setupRTC();
 
@@ -50,10 +51,12 @@ void setup() {
     writeLine("Time;Pressure (Bar);Pressure (Pascal);Humidity;Temperature");
     closeFile();
   }
-  if (working) {
-    displaySecondLine(String("Working, however."));
+  displayFirstLine("                ");
+  displaySecondLine("                ");
+  if (successfullyInitialized) {
+    displayFirstLine(String("Successfully initialized"));
   } else {
-    displaySecondLine(String("PROBLEM - PROBLEM"));
+    displayFirstLine(String("Cannot initialized!"));
   }
 }
 
@@ -64,9 +67,16 @@ void loop() {
   openFile(nameAtm);
   writeLine(getTimeFormatted() + ";" + getPressureBar() + ";" + getPressurePascal() + ";" + getHumidityString() + ";" + getTemperatureString());
   closeFile();
-  
+  displayFirstLine("                ");
+  displaySecondLine("                ");
+  if (working) {
+    displaySecondLine(String("Working, however"));
+  } else {
+    displaySecondLine(String("PROBLEM!"));
+  }
+  working = true;
   delay(1000);
-  if ( (nextMeasurement+3) % 5 == 0) stopPump(); 
+  if ( (nextMeasurement+1) % 5 == 0) stopPump(); 
   // The pump should be only activated for a short time (3s)
   nextMeasurement++;
 }
@@ -82,6 +92,7 @@ void stopPump(){
 
 void checkMoisture(){
   soilMoisture = analogRead(moistureSensorPin);
+  Serial.println(soilMoisture);
   if ( soilMoisture > moistureNorm ) startPump();
   /*if ( soilMoisture < moistureNorm ) stopPump();
   Serial.println(String(map(soilMoisture,253,1019,100,0))+","+String(soilMoisture));
@@ -145,7 +156,6 @@ bool isFileEmpty(String name) {
   atmFile = SD.open(name, FILE_READ);
   if (!atmFile) {
       Serial.println("Failed to open File " + nameAtm + "!");
-      working = false;
       return true;
   }
   bool response = atmFile.read() == -1;
