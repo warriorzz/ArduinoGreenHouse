@@ -37,7 +37,7 @@ void setup() {
   bme.init();
   
   setupLCD();
-  String randomString = ""; //gvetTimeFormatted()
+  String randomString = ""; //getTimeFormatted()
   randomString.concat("DATA.CSV");
   nameAtm = randomString;
   if (!setupSDCard()) {
@@ -61,9 +61,6 @@ void setup() {
 }
 
 void loop() {
-  digitalWrite(pumpPin, HIGH);
-  if ( nextMeasurement % 5 == 0 ) checkMoisture();
-
   openFile(nameAtm);
   writeLine(getTimeFormatted() + ";" + getPressureBar() + ";" + getPressurePascal() + ";" + getHumidityString() + ";" + getTemperatureString());
   closeFile();
@@ -75,10 +72,11 @@ void loop() {
     displaySecondLine(String("PROBLEM!"));
   }
   working = true;
+  if ( nextMeasurement % 60 == 0 ) checkMoisture();
   delay(1000);
-  if ( (nextMeasurement+1) % 60 == 0) stopPump(); 
-  // The pump should be only activated for a short time (3s)
   nextMeasurement++;
+  if ( (nextMeasurement+1) % 60 == 0) stopPump(); 
+  // The pump should be only activated for a short time (1s)
 }
 
 //Automatic irrigation
