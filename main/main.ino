@@ -67,10 +67,13 @@ void loop() {
   displayFirstLine("                ");
   displaySecondLine("                ");
   if (working) {
-    displaySecondLine(String("Working, however"));
+    displaySecondLine(String("Everything fine"));
   } else {
-    displaySecondLine(String("PROBLEM!"));
+    displaySecondLine(String("PROBLEM!         "));
   }
+  String firstLine = String("Moisture: ");
+  firstLine.concat(soilMoisture);
+  displayFirstLine(firstLine);
   working = true;
   if ( nextMeasurement % 60 == 0 ) checkMoisture();
   delay(1000);
@@ -103,7 +106,7 @@ void setupLCD() {
 }
 
 void displaySecondLine(String line) {
-    lcd.setCursor(1,0);
+    lcd.setCursor(0,1);
     lcd.print(line);
 }
 
