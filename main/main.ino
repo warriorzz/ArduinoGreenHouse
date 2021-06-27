@@ -8,7 +8,7 @@
 // Variables for automatic irrigation:
 int soilMoisture;
 int nextMeasurement = 0;
-const int moistureNorm = 700;  // The moisture we want to keep
+int moistureNorm = 700;  // The moisture we want to keep
 const int moistureSensorPin = A0;
 const int pumpPin = 10;
 
@@ -45,6 +45,7 @@ void setup() {
     successfullyInitialized = false;
   }
   setupRTC();
+  setKeepMoistureFromSDCard("MOISTURE.TXT");
 
   if (isFileEmpty(nameAtm)) {
     openFile(nameAtm);
@@ -136,8 +137,12 @@ bool setupSDCard() {
 void openFile(String name) {
   atmFile = SD.open(name, FILE_WRITE);
   if (!atmFile) {
-      working = false;
-      Serial.println("Failed to open File " + nameAtm + "!");
+      SD.mkdir(name);
+      atmFile = SD.open(name, FILE_WRITE);
+      if (!atmFile) {
+        working = false;
+        Serial.println("Failed to open File " + nameAtm + "!");
+      }
   }
 }
 
@@ -156,6 +161,7 @@ void closeFile() {
 bool isFileEmpty(String name) {
   atmFile = SD.open(name, FILE_READ);
   if (!atmFile) {
+      SD.mkdir(name);
       Serial.println("Failed to open File " + nameAtm + "!");
       return true;
   }
@@ -205,4 +211,17 @@ String randomString(){
         randomString.concat(pool.substring(randomInt, randomInt + 1));
     }
     return randomString;
+}
+
+void setKeepMoistureFromSDCard(String name) {
+  if (isFileEmpty(name)) {
+    return 700;
+  }
+  atmFile = SD.open(name, FILE_READ);
+  if (!atmFile) {
+      working = false;
+      Serial.println("Failed to open File " + nameAtm + "!");
+  }
+  moistureNorm = 100 * (atmFile.read() - 48) + 10 * (atmFile.read() - 48) + (atmFile.read() - 48);
+  Serial.println(moistureNorm);
 }
